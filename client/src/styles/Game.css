@@ -1,0 +1,50 @@
+.game-container {
+    margin-top: 20px;
+}
+
+.meme-image {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    font-size: 1.2rem;
+}
+
+.alert {
+    margin-top: 20px;
+}
+
+.correct {
+    background-color: #28a745 !important;
+    color: white !important;
+    animation: correctFeedback 1s ease-in-out;
+}
+
+.incorrect {
+    background-color: #dc3545 !important;
+    color: white !important;
+    animation: incorrectFeedback 1s ease-in-out;
+}
+
+@keyframes correctFeedback {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes incorrectFeedback {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.progress-bar {
+    height: 25px;
+    font-size: 1rem;
+    line-height: 25px;
+    color: #fff;
+}
