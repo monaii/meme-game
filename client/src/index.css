@@ -24,7 +24,6 @@ a:hover {
 
 body {
   margin: 0;
-  /* Remove place-items and flex to avoid conflict with Bootstrap */
   min-width: 320px;
   min-height: 100vh;
 }
@@ -64,4 +63,57 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* Additional styles for centering and spacing */
+.center-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.d-flex {
+  display: flex !important;
+}
+
+.align-items-center {
+  align-items: center !important;
+}
+
+.justify-content-center {
+  justify-content: center !important;
+}
+
+.vh-100 {
+  height: 100vh !important;
+}
+
+.text-center {
+  text-align: center !important;
 }
