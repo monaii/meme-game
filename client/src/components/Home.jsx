@@ -2,9 +2,11 @@ import React from 'react';
 
 const Home = () => {
     return (
-        <div>
-            <h1>Welcome to the Meme Game</h1>
-            <a href="/login">Login</a>
+        <div className="d-flex align-items-center justify-content-center vh-100">
+            <div className="text-center">
+                <h1>Welcome to the Meme Game</h1>
+                <a href="/login" className="btn btn-primary mt-3">Login</a>
+            </div>
         </div>
     );
 };

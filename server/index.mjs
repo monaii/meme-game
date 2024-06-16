@@ -11,7 +11,7 @@ const app = express();
 
 // CORS Configuration
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow requests from your client origin
+  origin: 'http://localhost:5173', // Allow requests from your client origin
   credentials: true
 }));
 
@@ -67,13 +67,30 @@ initializeDatabase().then(database => {
     res.sendStatus(200);
   });
 
+  app.get('/api/profile', async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+      const user = await db.get('SELECT * FROM users WHERE id = ?', [req.user.id]);
+      const gameHistory = await db.all('SELECT * FROM game_history WHERE user_id = ?', [req.user.id]);
+      res.json({ user, gameHistory });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+  });
+
   app.get('/api/memes', async (req, res) => {
     try {
+      console.log('Fetching memes...');
       const memes = await db.all('SELECT * FROM memes ORDER BY RANDOM() LIMIT 1');
       const meme = memes[0];
+      console.log('Meme fetched:', meme);
       const captions = await db.all('SELECT * FROM captions WHERE meme_id = ? ORDER BY RANDOM() LIMIT 7', meme.id);
+      console.log('Captions fetched:', captions);
       res.json({ meme, captions });
     } catch (err) {
+      console.error('Failed to fetch memes or captions:', err);
       res.status(500).json({ error: 'Failed to fetch memes or captions' });
     }
   });
@@ -94,34 +111,8 @@ initializeDatabase().then(database => {
 
       res.json({ score });
     } catch (err) {
+      console.error('Failed to save game data:', err);
       res.status(500).json({ error: 'Failed to save game data' });
-    }
-  });
-
-  app.get('/api/history', async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-
-    try {
-      const games = await db.all(`
-        SELECT g.id as game_id, g.total_score, r.meme_id, r.selected_caption_id, r.score 
-        FROM games g 
-        JOIN rounds r ON g.id = r.game_id 
-        WHERE g.user_id = ?
-      `, req.user.id);
-
-      const history = games.map(game => ({
-        gameId: game.game_id,
-        totalScore: game.total_score,
-        memeId: game.meme_id,
-        selectedCaptionId: game.selected_caption_id,
-        score: game.score,
-      }));
-
-      res.json(history);
-    } catch (err) {
-      res.status(500).json({ error: 'Failed to fetch game history' });
     }
   });
 

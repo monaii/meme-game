@@ -1,21 +1,19 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Home from './components/Home.jsx';
-import Login from './components/Login.jsx';
-import Game from './components/Game.jsx';
-import Profile from './components/Profile.jsx';
-import History from './components/History.jsx';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './components/Home';
+import Login from './components/Login';
+import Game from './components/Game';
+import Profile from './components/Profile';
 
 const App = () => {
     return (
         <Router>
-            <Switch>
-                <Route exact path="/" component={Home} />
-                <Route path="/login" component={Login} />
-                <Route path="/game" component={Game} />
-                <Route path="/profile" component={Profile} />
-                <Route path="/history" component={History} />
-            </Switch>
+            <Routes>
+                <Route exact path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/game" element={<Game />} />
+                <Route path="/profile" element={<Profile />} />
+            </Routes>
         </Router>
     );
 };

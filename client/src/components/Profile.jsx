@@ -10,10 +10,13 @@ function Profile() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
+                console.log('Fetching profile...');
                 const response = await axios.get('http://localhost:3001/api/profile', { withCredentials: true });
+                console.log('Profile fetched:', response.data);
                 setProfile(response.data.user);
                 setGameHistory(response.data.gameHistory);
             } catch (err) {
+                console.error('Failed to load profile:', err);
                 setError('Failed to load profile');
             }
         };
