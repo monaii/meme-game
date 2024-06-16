@@ -1,39 +1,23 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Home from './components/Home';
-import Game from './components/Game';
-import Login from './components/Login';
-import './App.css';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Home from './components/Home.jsx';
+import Login from './components/Login.jsx';
+import Game from './components/Game.jsx';
+import Profile from './components/Profile.jsx';
+import History from './components/History.jsx';
 
-function App() {
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await axios.get('http://localhost:3001/api/auth/check', { withCredentials: true });
-                setUser(response.data.user);
-            } catch (err) {
-                setUser(null);
-            }
-        };
-        checkAuth();
-    }, []);
-
-    const PrivateRoute = ({ children }) => {
-        return user ? children : <Navigate to="/login" />;
-    };
-
+const App = () => {
     return (
         <Router>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/game" element={<PrivateRoute><Game /></PrivateRoute>} />
-                <Route path="/login" element={<Login />} />
-            </Routes>
+            <Switch>
+                <Route exact path="/" component={Home} />
+                <Route path="/login" component={Login} />
+                <Route path="/game" component={Game} />
+                <Route path="/profile" component={Profile} />
+                <Route path="/history" component={History} />
+            </Switch>
         </Router>
     );
-}
+};
 
 export default App;
