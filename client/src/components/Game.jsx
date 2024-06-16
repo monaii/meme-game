@@ -8,10 +8,13 @@ const Game = () => {
     useEffect(() => {
         const fetchMeme = async () => {
             try {
-                const memeResponse = await axios.get('/api/memes');
+                console.log('Fetching meme...');
+                const memeResponse = await axios.get('http://localhost:3001/api/memes', { withCredentials: true });
+                console.log('Meme fetched:', memeResponse.data);
                 setMeme(memeResponse.data.meme);
 
-                const captionsResponse = await axios.get('/api/captions/random', { params: { memeId: memeResponse.data.meme.id } });
+                const captionsResponse = await axios.get('http://localhost:3001/api/captions/random', { params: { memeId: memeResponse.data.meme.id }, withCredentials: true });
+                console.log('Captions fetched:', captionsResponse.data);
                 setCaptions(captionsResponse.data);
             } catch (error) {
                 console.error('Failed to fetch meme and captions', error);

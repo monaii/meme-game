@@ -4,18 +4,23 @@ import passport from 'passport';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { initializeDatabase } from './database.js'; // Import the database module
-import { comparePassword } from './utilities.js'; // Import utility functions
+import { initializeDatabase } from './database.mjs'; // Import the database module
+import { comparePassword } from './utilities.js'; // Import the utility functions
 
 const app = express();
 
-app.use(cors());
+// CORS Configuration
+app.use(cors({
+  origin: 'http://localhost:3000', // Allow requests from your client origin
+  credentials: true
+}));
+
 app.use(bodyParser.json());
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/images', express.static('client/public/images')); // Ensure this path is correct and accessible
+app.use('/images', express.static('client/public/images'));
 
 let db;
 initializeDatabase().then(database => {
@@ -29,7 +34,7 @@ initializeDatabase().then(database => {
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       }
-      const match = await comparePassword(password, user.password); // Use comparePassword utility
+      const match = await comparePassword(password, user.password);
       if (!match) {
         return done(null, false, { message: 'Incorrect password.' });
       }
@@ -66,7 +71,7 @@ initializeDatabase().then(database => {
     try {
       const memes = await db.all('SELECT * FROM memes ORDER BY RANDOM() LIMIT 1');
       const meme = memes[0];
-      const captions = await db.all('SELECT * FROM captions ORDER BY RANDOM() LIMIT 7');
+      const captions = await db.all('SELECT * FROM captions WHERE meme_id = ? ORDER BY RANDOM() LIMIT 7', meme.id);
       res.json({ meme, captions });
     } catch (err) {
       res.status(500).json({ error: 'Failed to fetch memes or captions' });
