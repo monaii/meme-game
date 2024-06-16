@@ -3,8 +3,9 @@ import session from 'express-session';
 import passport from 'passport';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import bcrypt from 'bcrypt';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { initializeDatabase } from './database.mjs'; // Import the database module
+import { initializeDatabase, getUserByUsername, getUserById, getRandomMeme, getCorrectCaptions, getOtherCaptions, addRound, addUser, getOrCreateGameId, updateGameScore, getRoundsByUserId } from './dao.mjs';
 
 const app = express();
 
@@ -17,18 +18,22 @@ app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/images', express.static('client/public/images'));
+// Serve static images from the public/images directory
+app.use('/images', express.static('public/images'));
 
-let db;
-initializeDatabase().then(database => {
-  db = database;
+initializeDatabase().then(() => {
+  console.log('Database initialized');
 
   passport.use(new LocalStrategy(async (username, password, done) => {
-    const user = await db.get('SELECT * FROM users WHERE username = ?', username);
-    if (!user || user.password !== password) {
-      return done(null, false, { message: 'Incorrect username or password.' });
+    try {
+      const user = await getUserByUsername(username);
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+        return done(null, false, { message: 'Incorrect username or password.' });
+      }
+      return done(null, user);
+    } catch (error) {
+      return done(error);
     }
-    return done(null, user);
   }));
 
   passport.serializeUser((user, done) => {
@@ -36,8 +41,12 @@ initializeDatabase().then(database => {
   });
 
   passport.deserializeUser(async (id, done) => {
-    const user = await db.get('SELECT * FROM users WHERE id = ?', id);
-    done(null, user);
+    try {
+      const user = await getUserById(id);
+      done(null, user);
+    } catch (error) {
+      done(error);
+    }
   });
 
   app.post('/api/login', passport.authenticate('local'), (req, res) => {
@@ -51,10 +60,10 @@ initializeDatabase().then(database => {
 
   app.get('/api/memes', async (req, res) => {
     try {
-      const meme = await db.get('SELECT * FROM memes ORDER BY RANDOM() LIMIT 1');
-      const correctCaptions = await db.all('SELECT * FROM captions WHERE id IN (SELECT caption_id FROM meme_captions WHERE meme_id = ?)', meme.id);
-      const otherCaptions = await db.all('SELECT * FROM captions WHERE id NOT IN (SELECT caption_id FROM meme_captions WHERE meme_id = ?) ORDER BY RANDOM() LIMIT 5', meme.id);
-      const captions = correctCaptions.concat(otherCaptions).sort(() => 0.5 - Math.random()); // Shuffle captions
+      const meme = await getRandomMeme();
+      const correctCaptions = await getCorrectCaptions(meme.id);
+      const otherCaptions = await getOtherCaptions(meme.id);
+      const captions = [...correctCaptions, ...otherCaptions].sort(() => 0.5 - Math.random());
       res.json({ meme, captions });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch meme and captions' });
@@ -62,13 +71,41 @@ initializeDatabase().then(database => {
   });
 
   app.post('/api/game', async (req, res) => {
-    const { memeId, selectedCaptionId } = req.body;
+    const { memeId, selectedCaptionId, round } = req.body;
     try {
-      const correctCaptions = await db.all('SELECT * FROM captions WHERE id IN (SELECT caption_id FROM meme_captions WHERE meme_id = ?)', memeId);
+      const correctCaptions = await getCorrectCaptions(memeId);
       const correct = correctCaptions.some(caption => caption.id === selectedCaptionId);
-      res.json({ correct, correctCaptions: correctCaptions.map(caption => caption.id) });
+      let gameId = null;
+      let totalScore = null;
+
+      if (req.isAuthenticated()) {
+        gameId = await getOrCreateGameId(req.user.id);
+        const score = correct ? 5 : 0;
+        await addRound(memeId, selectedCaptionId, gameId, score);
+
+        const rounds = await getRoundsByUserId(req.user.id);
+        if (round >= 3) {
+          totalScore = rounds.reduce((sum, r) => sum + r.score, 0);
+          await updateGameScore(gameId, totalScore);
+        }
+      }
+
+      res.json({ correct, correctCaptions: correctCaptions.map(caption => caption.id), totalScore });
     } catch (error) {
       res.status(500).json({ error: 'Failed to submit caption' });
+    }
+  });
+
+  app.get('/api/profile', async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+      const user = await getUserById(req.user.id);
+      const gameHistory = await getRoundsByUserId(req.user.id);
+      res.json({ user, gameHistory });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch profile' });
     }
   });
 

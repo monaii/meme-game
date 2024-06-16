@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import 'tailwindcss/tailwind.css';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -17,38 +17,47 @@ const Login = () => {
                 navigate('/game');
             }
         } catch (error) {
-            setError('Login failed. Please check your credentials.');
+            setError('Login failed. Please check your username and password.');
         }
     };
 
     return (
-        <Container className="d-flex align-items-center justify-content-center vh-100">
-            <Row className="w-100">
-                <Col xs={12} md={6} lg={4} className="mx-auto">
-                    <h2 className="text-center mb-4">Login</h2>
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group controlId="username" className="mb-3">
-                            <Form.Label>Username</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="password" className="mb-3">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Button variant="primary" type="submit" className="w-100">Login</Button>
-                    </Form>
-                </Col>
-            </Row>
-        </Container>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
+                <div className="space-y-2">
+                    <h2 className="text-3xl font-extrabold text-center text-gray-900">Welcome</h2>
+                    <p className="text-center text-gray-600">Please login to your account</p>
+                </div>
+                {error && <div className="p-3 text-sm text-red-600 bg-red-100 rounded">{error}</div>}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-1">
+                        <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-indigo-300 focus:outline-none"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-indigo-300 focus:outline-none"
+                        />
+                    </div>
+                    <button type="submit" className="w-full py-3 mt-4 text-lg font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 };
 

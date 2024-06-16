@@ -12,19 +12,20 @@ const Game = () => {
     const [feedback, setFeedback] = useState('');
     const [timeLeft, setTimeLeft] = useState(30);
     const [gameOver, setGameOver] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
-    const fetchMemeAndCaptions = async () => {
-        try {
-            const memeResponse = await axios.get('http://localhost:3001/api/memes', { withCredentials: true });
-            setMeme(memeResponse.data.meme);
-            setCaptions(memeResponse.data.captions);
-        } catch (error) {
-            console.error('Failed to fetch meme and captions', error);
-        }
-    };
-
     useEffect(() => {
+        const fetchUserStatus = async () => {
+            try {
+                await axios.get('http://localhost:3001/api/profile', { withCredentials: true });
+                setIsLoggedIn(true);
+            } catch {
+                setIsLoggedIn(false);
+            }
+        };
+
+        fetchUserStatus();
         fetchMemeAndCaptions();
     }, []);
 
@@ -45,6 +46,16 @@ const Game = () => {
         return () => clearInterval(timer);
     }, [round, gameOver]);
 
+    const fetchMemeAndCaptions = async () => {
+        try {
+            const response = await axios.get('http://localhost:3001/api/memes', { withCredentials: true });
+            setMeme(response.data.meme);
+            setCaptions(response.data.captions);
+        } catch (error) {
+            console.error('Failed to fetch meme and captions', error);
+        }
+    };
+
     const handleCaptionSelect = async (captionId) => {
         setSelectedCaption(captionId);
         handleSubmit(captionId);
@@ -54,26 +65,30 @@ const Game = () => {
         try {
             const response = await axios.post('http://localhost:3001/api/game', {
                 memeId: meme.id,
-                selectedCaptionId: captionId
+                selectedCaptionId: captionId,
+                round
             }, { withCredentials: true });
-            const { correct, correctCaptions } = response.data;
+            const { correct, correctCaptions, totalScore } = response.data;
             if (correct) {
                 setScore(score + 5);
                 setFeedback('Correct!');
             } else {
                 setFeedback(`Incorrect. Correct captions were: ${correctCaptions.map(id => captions.find(c => c.id === id).text).join(', ')}`);
             }
-            if (round < 1) {
+
+            if ((isLoggedIn && round < 3) || (!isLoggedIn && round < 1)) {
                 setRound(round + 1);
-                setTimeLeft(30); // Reset the timer for the next round
+                setTimeLeft(30);
                 setTimeout(() => {
                     fetchMemeAndCaptions();
                     setSelectedCaption(null);
                     setFeedback('');
                 }, 3000);
             } else {
-                // Game over logic for anonymous user after 1 round
                 setGameOver(true);
+                if (isLoggedIn) {
+                    setScore(totalScore);
+                }
             }
         } catch (error) {
             console.error('Failed to submit caption', error);
@@ -83,13 +98,17 @@ const Game = () => {
     const handleTimeout = () => {
         if (!selectedCaption) {
             setFeedback('Time is up! Please select a caption faster next time.');
-            setRound(round + 1);
-            setTimeLeft(30); // Reset the timer for the next round
-            setTimeout(() => {
-                fetchMemeAndCaptions();
-                setSelectedCaption(null);
-                setFeedback('');
-            }, 3000);
+            if ((isLoggedIn && round < 3) || (!isLoggedIn && round < 1)) {
+                setRound(round + 1);
+                setTimeLeft(30);
+                setTimeout(() => {
+                    fetchMemeAndCaptions();
+                    setSelectedCaption(null);
+                    setFeedback('');
+                }, 3000);
+            } else {
+                setGameOver(true);
+            }
         }
     };
 
@@ -115,15 +134,18 @@ const Game = () => {
                 )}
                 {feedback && <Alert variant={feedback.includes('Correct') ? 'success' : 'danger'} className="mt-3">{feedback}</Alert>}
                 <p className="mt-3">Score: {score}</p>
-                <p className="mt-3">Round: {round}/1</p>
+                <p className="mt-3">Round: {round}/{isLoggedIn ? 3 : 1}</p>
                 <p className="mt-3">Time Left: {timeLeft}s</p>
                 {gameOver && (
                     <div className="mt-3">
                         <Alert variant="info">
-                            Game Over! Your final score is {score}.<br />
-                            To play more, please <Button variant="link" onClick={() => navigate('/login')}>login</Button>.
+                            Great! Your final score is {score}.<br />
+                            {isLoggedIn
+                                ? <Button variant="link" onClick={() => navigate('/profile')}>View Profile</Button>
+                                : <>To play more, please login.</>
+                            }
                         </Alert>
-                        <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>
+                        {!isLoggedIn && <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>}
                     </div>
                 )}
             </div>
