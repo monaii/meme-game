@@ -12,7 +12,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3001/api/login', { username, password }, { withCredentials: true });
+            const response = await axios.post('http://localhost:3001/auth/login', { username, password }, { withCredentials: true });
             if (response.data) {
                 navigate('/game');
             }
@@ -20,6 +20,7 @@ const Login = () => {
             setError('Login failed. Please check your username and password.');
         }
     };
+
 
     return (
         <div className="center-container bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">

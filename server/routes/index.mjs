@@ -11,9 +11,21 @@ import './setup.mjs'; // Passport.js setup
 const app = express();
 app.use(express.static('client/public')); // Serve static files
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // or the address of your frontend
+    credentials: true
+}));
 app.use(bodyParser.json());
-app.use(session({ secret: 'your_secret_key', resave: false, saveUninitialized: false }));
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false, // set to true if using https
+        maxAge: 60000 // session expiration time in ms
+    }
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
