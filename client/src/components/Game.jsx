@@ -1,156 +1,112 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Button, Image, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import '../styles/Game.css';
 
-const Game = () => {
+function Game() {
     const [meme, setMeme] = useState(null);
     const [captions, setCaptions] = useState([]);
     const [selectedCaption, setSelectedCaption] = useState(null);
     const [score, setScore] = useState(0);
     const [round, setRound] = useState(1);
-    const [feedback, setFeedback] = useState('');
-    const [timeLeft, setTimeLeft] = useState(30);
+    const [message, setMessage] = useState('');
+    const [timer, setTimer] = useState(30);
     const [gameOver, setGameOver] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const navigate = useNavigate();
+    const [userId, setUserId] = useState(null);
+    const [rounds, setRounds] = useState([]);
 
     useEffect(() => {
-        const fetchUserStatus = async () => {
-            try {
-                await axios.get('http://localhost:3001/api/profile', { withCredentials: true });
-                setIsLoggedIn(true);
-            } catch {
-                setIsLoggedIn(false);
-            }
-        };
-
-        fetchUserStatus();
-        fetchMemeAndCaptions();
-    }, []);
+        if (round <= 3) {
+            fetchMeme();
+        } else {
+            setGameOver(true);
+            recordGame();
+        }
+    }, [round]);
 
     useEffect(() => {
-        if (gameOver) return;
+        if (timer > 0) {
+            const timeout = setTimeout(() => setTimer(timer - 1), 1000);
+            return () => clearTimeout(timeout);
+        } else {
+            handleTimeout();
+        }
+    }, [timer]);
 
-        const timer = setInterval(() => {
-            setTimeLeft(prevTime => {
-                if (prevTime <= 1) {
-                    clearInterval(timer);
-                    handleTimeout();
-                    return 0;
-                }
-                return prevTime - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [round, gameOver]);
-
-    const fetchMemeAndCaptions = async () => {
+    const fetchMeme = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/memes', { withCredentials: true });
-            setMeme(response.data.meme);
-            setCaptions(response.data.captions);
+            const res = await axios.get('http://localhost:3001/api/random-meme');
+            setMeme(res.data.meme);
+            setCaptions(res.data.captions);
+            setSelectedCaption(null);
+            setTimer(30);
+            setMessage('');
         } catch (error) {
-            console.error('Failed to fetch meme and captions', error);
+            console.error('Error fetching meme:', error);
         }
     };
 
-    const handleCaptionSelect = async (captionId) => {
-        setSelectedCaption(captionId);
-        handleSubmit(captionId);
-    };
-
-    const handleSubmit = async (captionId) => {
-        try {
-            const response = await axios.post('http://localhost:3001/api/game', {
-                memeId: meme.id,
-                selectedCaptionId: captionId,
-                round
-            }, { withCredentials: true });
-            const { correct, correctCaptions, totalScore } = response.data;
-            if (correct) {
-                setScore(score + 5);
-                setFeedback('Correct!');
-            } else {
-                setFeedback(`Incorrect. Correct captions were: ${correctCaptions.map(id => captions.find(c => c.id === id).text).join(', ')}`);
-            }
-
-            if ((isLoggedIn && round < 3) || (!isLoggedIn && round < 1)) {
-                setRound(round + 1);
-                setTimeLeft(30);
-                setTimeout(() => {
-                    fetchMemeAndCaptions();
-                    setSelectedCaption(null);
-                    setFeedback('');
-                }, 3000);
-            } else {
-                setGameOver(true);
-                if (isLoggedIn) {
-                    setScore(totalScore);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to submit caption', error);
+    const handleCaptionClick = (caption) => {
+        setSelectedCaption(caption);
+        let roundScore = 0;
+        if (caption.correct) {
+            roundScore = 5;
+            setScore(score + 5);
+            setMessage('Correct! You earned 5 points.');
+        } else {
+            setMessage('Incorrect. Better luck next time.');
         }
+        setRounds([...rounds, { memeId: meme.id, selectedCaptionId: caption.id, score: roundScore }]);
+        setTimeout(() => setRound(round + 1), 2000);
     };
 
     const handleTimeout = () => {
-        if (!selectedCaption) {
-            setFeedback('Time is up! Please select a caption faster next time.');
-            if ((isLoggedIn && round < 3) || (!isLoggedIn && round < 1)) {
-                setRound(round + 1);
-                setTimeLeft(30);
-                setTimeout(() => {
-                    fetchMemeAndCaptions();
-                    setSelectedCaption(null);
-                    setFeedback('');
-                }, 3000);
-            } else {
-                setGameOver(true);
-            }
+        setMessage('Time is up! No points awarded.');
+        setRounds([...rounds, { memeId: meme.id, selectedCaptionId: null, score: 0 }]);
+        setTimeout(() => setRound(round + 1), 2000);
+    };
+
+    const recordGame = async () => {
+        try {
+            await axios.post('http://localhost:3001/api/record-game', {
+                userId,
+                rounds
+            });
+        } catch (error) {
+            console.error('Error recording game:', error);
         }
     };
 
     return (
-        <Container className="center-container text-center">
-            <div>
-                {meme && !gameOver && (
-                    <div>
-                        <Image src={`/images/${meme.image_url}`} alt="Meme" fluid className="mb-3" />
-                        <div className="d-grid gap-2 mb-3">
-                            {captions.map(caption => (
-                                <Button
-                                    key={caption.id}
-                                    variant={selectedCaption === caption.id ? 'success' : 'outline-secondary'}
-                                    onClick={() => handleCaptionSelect(caption.id)}
-                                    className="mb-2"
-                                >
-                                    {caption.text}
-                                </Button>
-                            ))}
+        <div className="game-container">
+            {gameOver ? (
+                <div className="game-over">
+                    <h2>Game Over</h2>
+                    <p>Your total score: {score}</p>
+                </div>
+            ) : (
+                <div className="game-content">
+                    <h2>Round {round}</h2>
+                    <div className="timer-bar">
+                        <div className="timer-bar-inner" style={{ width: `${(timer / 30) * 100}%` }}></div>
+                    </div>
+                    <p>Time remaining: {timer}s</p>
+                    {meme && (
+                        <div className="meme">
+                            <img src={meme.image_url} alt="Meme" />
                         </div>
+                    )}
+                    <div className="captions">
+                        {captions.map((caption) => (
+                            <button key={caption.id} onClick={() => handleCaptionClick(caption)}>
+                                {caption.text}
+                            </button>
+                        ))}
                     </div>
-                )}
-                {feedback && <Alert variant={feedback.includes('Correct') ? 'success' : 'danger'} className="mt-3">{feedback}</Alert>}
-                <p className="mt-3">Score: {score}</p>
-                <p className="mt-3">Round: {round}/{isLoggedIn ? 3 : 1}</p>
-                <p className="mt-3">Time Left: {timeLeft}s</p>
-                {gameOver && (
-                    <div className="mt-3">
-                        <Alert variant="info">
-                            Great! Your final score is {score}.<br />
-                            {isLoggedIn
-                                ? <Button variant="link" onClick={() => navigate('/profile')}>View Profile</Button>
-                                : <>To play more, please login.</>
-                            }
-                        </Alert>
-                        {!isLoggedIn && <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>}
-                    </div>
-                )}
-            </div>
-        </Container>
+                    <p>{message}</p>
+                </div>
+            )}
+        </div>
     );
-};
+}
 
 export default Game;

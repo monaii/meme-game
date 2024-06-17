@@ -1,23 +1,19 @@
+// client/src/components/Home.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Button, Row, Col } from 'react-bootstrap';
 
-const Home = () => {
+function Home() {
     return (
-        <Container className="d-flex align-items-center justify-content-center vh-100">
-            <Row className="text-center">
-                <Col>
-                    <h1 className="mb-4">Welcome to the Meme Game</h1>
-                    <Link to="/login">
-                        <Button variant="primary" size="lg" className="me-3">Login</Button>
-                    </Link>
-                    <Link to="/game">
-                        <Button variant="secondary" size="lg">Play as Guest</Button>
-                    </Link>
-                </Col>
-            </Row>
-        </Container>
+        <div className="center-container bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+            <div className="bg-white p-10 rounded-lg shadow-lg text-center max-w-md w-full">
+                <h1 className="text-3xl font-bold mb-5">Welcome to Meme Game</h1>
+                <p className="text-lg mb-5">Log in to start playing the meme guessing game!</p>
+                <Link to="/login" className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
+                    Log In
+                </Link>
+            </div>
+        </div>
     );
-};
+}
 
 export default Home;

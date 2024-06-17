@@ -1,12 +1,9 @@
-import express from 'express';
-import sqlite3 from 'sqlite3';
+// server/db/schema.mjs
 import { open } from 'sqlite';
+import sqlite3 from 'sqlite3';
 
-const router = express.Router();
-let db;
-
-const initializeDatabase = async () => {
-    db = await open({
+export const initializeDatabase = async () => {
+    const db = await open({
         filename: './database.db',
         driver: sqlite3.Database
     });
@@ -54,24 +51,6 @@ const initializeDatabase = async () => {
             FOREIGN KEY(selected_caption_id) REFERENCES captions(id)
         );
     `);
+
+    return db;
 };
-
-initializeDatabase();
-
-// Get random meme and captions
-router.get('/random-meme', async (req, res) => {
-    try {
-        const meme = await db.get('SELECT * FROM memes ORDER BY RANDOM() LIMIT 1');
-        const correctCaptions = await db.all('SELECT c.* FROM captions c JOIN meme_captions mc ON c.id = mc.caption_id WHERE mc.meme_id = ? AND mc.correct = 1', [meme.id]);
-        const otherCaptions = await db.all('SELECT * FROM captions WHERE id NOT IN (SELECT caption_id FROM meme_captions WHERE meme_id = ?) ORDER BY RANDOM() LIMIT 5', [meme.id]);
-
-        // Merge correct and incorrect captions and shuffle them
-        const captions = [...correctCaptions, ...otherCaptions].sort(() => Math.random() - 0.5);
-
-        res.json({ meme, captions });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-export default router;

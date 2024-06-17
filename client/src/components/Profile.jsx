@@ -1,53 +1,39 @@
-import React, { useState, useEffect } from 'react';
+// client/src/components/Profile.jsx
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Container, ListGroup, Alert } from 'react-bootstrap';
 
 function Profile() {
-    const [profile, setProfile] = useState(null);
-    const [gameHistory, setGameHistory] = useState([]);
-    const [error, setError] = useState(null);
+    const [games, setGames] = useState([]);
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                console.log('Fetching profile...');
-                const response = await axios.get('http://localhost:3001/api/profile', { withCredentials: true });
-                console.log('Profile fetched:', response.data);
-                setProfile(response.data.user);
-                setGameHistory(response.data.gameHistory);
-            } catch (err) {
-                console.error('Failed to load profile:', err);
-                setError('Failed to load profile');
-            }
+        const fetchGames = async () => {
+            const userId = 1; // Replace with actual logged-in user ID
+            const response = await axios.get(`http://localhost:3001/api/user-history/${userId}`);
+            setGames(response.data.games);
         };
-        fetchProfile();
+
+        fetchGames();
     }, []);
 
-    if (error) {
-        return (
-            <Container className="mt-5">
-                <Alert variant="danger">{error}</Alert>
-            </Container>
-        );
-    }
-
     return (
-        <Container className="mt-5">
-            <h2>Profile</h2>
-            {profile && (
-                <div>
-                    <p><strong>Username:</strong> {profile.username}</p>
-                    <h3>Game History</h3>
-                    <ListGroup>
-                        {gameHistory.map((game, index) => (
-                            <ListGroup.Item key={index}>
-                                Meme: {game.meme_id}, Score: {game.score}
-                            </ListGroup.Item>
+        <div className="center-container bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+            <div className="w-full max-w-2xl p-8 space-y-6 bg-white rounded-xl shadow-2xl">
+                <h2 className="text-3xl font-extrabold text-center text-gray-900">Your Game History</h2>
+                {games.length > 0 ? (
+                    <ul className="space-y-4">
+                        {games.map((game) => (
+                            <li key={game.id} className="p-4 bg-gray-100 rounded-md shadow-md">
+                                <p>Game ID: {game.id}</p>
+                                <p>Total Score: {game.total_score}</p>
+                                {/* Add more details as needed */}
+                            </li>
                         ))}
-                    </ListGroup>
-                </div>
-            )}
-        </Container>
+                    </ul>
+                ) : (
+                    <p className="text-center text-gray-600">No game history available.</p>
+                )}
+            </div>
+        </div>
     );
 }
 

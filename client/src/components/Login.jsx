@@ -1,7 +1,7 @@
+// client/src/components/Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import 'tailwindcss/tailwind.css';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -22,7 +22,7 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+        <div className="center-container bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
                 <div className="space-y-2">
                     <h2 className="text-3xl font-extrabold text-center text-gray-900">Welcome</h2>

@@ -1,50 +1,65 @@
+/* Game.css */
 .game-container {
-    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
 }
 
-.meme-image {
+.game-content {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 80%;
+    max-width: 600px;
+}
+
+.meme img {
     max-width: 100%;
-    height: auto;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
-button {
-    font-size: 1.2rem;
+.captions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
 }
 
-.alert {
-    margin-top: 20px;
+.captions button {
+    flex: 1 1 calc(50% - 10px);
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
 
-.correct {
-    background-color: #28a745 !important;
-    color: white !important;
-    animation: correctFeedback 1s ease-in-out;
+.captions button:hover {
+    background-color: #357abd;
 }
 
-.incorrect {
-    background-color: #dc3545 !important;
-    color: white !important;
-    animation: incorrectFeedback 1s ease-in-out;
+.timer-bar {
+    background-color: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    height: 10px;
 }
 
-@keyframes correctFeedback {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+.timer-bar-inner {
+    background-color: #ff6f61;
+    height: 100%;
+    transition: width 1s linear;
 }
 
-@keyframes incorrectFeedback {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.9); }
-    100% { transform: scale(1); }
-}
-
-.progress-bar {
-    height: 25px;
-    font-size: 1rem;
-    line-height: 25px;
-    color: #fff;
+.game-over {
+    text-align: center;
 }

@@ -1,0 +1,30 @@
+/* Home.css */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    background: linear-gradient(to right, #0000ff, #ff00ff, #ff007f);
+}
+
+.home-button {
+    padding: 1rem 2rem;
+    background-color: #fff;
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: background-color 0.3s;
+}
+
+.home-button:hover {
+    background-color: #f0f0f0;
+}
+
+.ml-4 {
+    margin-left: 1rem;
+}
