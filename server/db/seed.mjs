@@ -80,7 +80,6 @@ const seedDatabase = async () => {
             'meme10.jpeg',
             'meme11.jpeg',
             'meme12.jpeg',
-            'meme13.jpeg',
         ];
         for (const meme of memes) {
             await db.run('INSERT INTO memes (image_url) VALUES (?)', `/images/${meme}`);
@@ -91,8 +90,8 @@ const seedDatabase = async () => {
     if (captionCount.count === 0) {
         const captions = [
             // Meme 1
-            'Correct Caption 1 for Meme 1',
-            'Correct Caption 2 for Meme 1',
+            'Me trying to act cool when I don\'t understand the joke but everyone is laughing.',
+            'When your friend says they\'re \'good\' at cooking but burns water.',
             'Incorrect Caption 1 for Meme 1',
             'Incorrect Caption 2 for Meme 1',
             'Incorrect Caption 3 for Meme 1',
@@ -100,8 +99,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 1',
 
             // Meme 2
-            'Correct Caption 1 for Meme 2',
-            'Correct Caption 2 for Meme 2',
+            'When they say \'Trust me, bro\' for the third time.',
+            'When they say pineapple belongs on pizza.',
             'Incorrect Caption 1 for Meme 2',
             'Incorrect Caption 2 for Meme 2',
             'Incorrect Caption 3 for Meme 2',
@@ -109,8 +108,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 2',
 
             // Meme 3
-            'Correct Caption 1 for Meme 3',
-            'Correct Caption 2 for Meme 3',
+            'When you promise to focus on work but a new Netflix series drops.',
+            'When you say you\'re going to learn Python but JavaScript releases a new framework.',
             'Incorrect Caption 1 for Meme 3',
             'Incorrect Caption 2 for Meme 3',
             'Incorrect Caption 3 for Meme 3',
@@ -118,8 +117,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 3',
 
             // Meme 4
-            'Correct Caption 1 for Meme 4',
-            'Correct Caption 2 for Meme 4',
+            'When your code runs without errors and you have no idea why.',
+            'When you add a new feature and the whole project stops working.',
             'Incorrect Caption 1 for Meme 4',
             'Incorrect Caption 2 for Meme 4',
             'Incorrect Caption 3 for Meme 4',
@@ -127,8 +126,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 4',
 
             // Meme 5
-            'Correct Caption 1 for Meme 5',
-            'Correct Caption 2 for Meme 5',
+            'When the client changes the project requirements a day before the deadline.',
+            'Me in the machine learning and pattern recognition class.',
             'Incorrect Caption 1 for Meme 5',
             'Incorrect Caption 2 for Meme 5',
             'Incorrect Caption 3 for Meme 5',
@@ -136,8 +135,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 5',
 
             // Meme 6
-            'Correct Caption 1 for Meme 6',
-            'Correct Caption 2 for Meme 6',
+            'When you realize all your friends have done we project and you haven\'t even started.',
+            'When you\'re the first one to finish the exam and everyone is still writing.',
             'Incorrect Caption 1 for Meme 6',
             'Incorrect Caption 2 for Meme 6',
             'Incorrect Caption 3 for Meme 6',
@@ -145,8 +144,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 6',
 
             // Meme 7
-            'Correct Caption 1 for Meme 7',
-            'Correct Caption 2 for Meme 7',
+            'How you doing?',
+            'Joye doesn\'t share food.',
             'Incorrect Caption 1 for Meme 7',
             'Incorrect Caption 2 for Meme 7',
             'Incorrect Caption 3 for Meme 7',
@@ -154,8 +153,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 7',
 
             // Meme 8
-            'Correct Caption 1 for Meme 8',
-            'Correct Caption 2 for Meme 8',
+            'I\'m fine, I\'m totally fine. I\'m more than fine , I\'m great !!!.',
+            'when everything is falling apart but you still try to be positive.',
             'Incorrect Caption 1 for Meme 8',
             'Incorrect Caption 2 for Meme 8',
             'Incorrect Caption 3 for Meme 8',
@@ -163,8 +162,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 8',
 
             // Meme 9
-            'Correct Caption 1 for Meme 9',
-            'Correct Caption 2 for Meme 9',
+            'Oh no, god , no , no , noooooooo, no , no no no no',
+            'that\'s what she said',
             'Incorrect Caption 1 for Meme 9',
             'Incorrect Caption 2 for Meme 9',
             'Incorrect Caption 3 for Meme 9',
@@ -172,7 +171,7 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 9',
 
             // Meme 10
-            'Correct Caption 1 for Meme 10',
+            'But you said my score will be 30L, I said in sha allah',
             'Correct Caption 2 for Meme 10',
             'Incorrect Caption 1 for Meme 10',
             'Incorrect Caption 2 for Meme 10',
@@ -181,8 +180,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 10',
 
             // Meme 11
-            'Correct Caption 1 for Meme 11',
-            'Correct Caption 2 for Meme 11',
+            'my eyes , my eyessss , my eyesssssssss',
+            'Monica and Chandler, Chandler and Monica',
             'Incorrect Caption 1 for Meme 11',
             'Incorrect Caption 2 for Meme 11',
             'Incorrect Caption 3 for Meme 11',
@@ -190,8 +189,8 @@ const seedDatabase = async () => {
             'Incorrect Caption 5 for Meme 11',
 
             // Meme 12
-            'Correct Caption 1 for Meme 12',
-            'Correct Caption 2 for Meme 12',
+            'True story',
+            'Its gonna be LEGENDARY',
             'Incorrect Caption 1 for Meme 12',
             'Incorrect Caption 2 for Meme 12',
             'Incorrect Caption 3 for Meme 12',

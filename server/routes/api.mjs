@@ -65,8 +65,7 @@ router.get('/random-meme', async (req, res) => {
         const correctCaptions = await db.all('SELECT c.* FROM captions c JOIN meme_captions mc ON c.id = mc.caption_id WHERE mc.meme_id = ? AND mc.correct = 1', [meme.id]);
         const otherCaptions = await db.all('SELECT * FROM captions WHERE id NOT IN (SELECT caption_id FROM meme_captions WHERE meme_id = ?) ORDER BY RANDOM() LIMIT 5', [meme.id]);
 
-        // Merge correct and incorrect captions and shuffle them
-        const captions = [...correctCaptions, ...otherCaptions].sort(() => Math.random() - 0.5);
+        const captions = [...correctCaptions, ...otherCaptions]
 
         res.json({ meme, captions });
     } catch (error) {

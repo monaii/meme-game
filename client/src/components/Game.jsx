@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/Game.css';
 
 function Game() {
     const [meme, setMeme] = useState(null);
     const [captions, setCaptions] = useState([]);
-    const [selectedCaption, setSelectedCaption] = useState(null);
-    const [score, setScore] = useState(0);
+    const [selectedCaptions, setSelectedCaptions] = useState([]);
     const [round, setRound] = useState(1);
-    const [message, setMessage] = useState('');
     const [timer, setTimer] = useState(30);
     const [gameOver, setGameOver] = useState(false);
-    const [userId, setUserId] = useState(null);
     const [rounds, setRounds] = useState([]);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const isGuest = new URLSearchParams(location.search).get('guest') === 'true';
 
     useEffect(() => {
-        if (round <= 3) {
+        if (round <= (isGuest ? 1 : 3)) {
             fetchMeme();
         } else {
             setGameOver(true);
-            recordGame();
+            if (!isGuest) {
+                recordGame();
+            }
         }
     }, [round]);
 
@@ -37,51 +40,63 @@ function Game() {
             const res = await axios.get('http://localhost:3001/api/random-meme');
             setMeme(res.data.meme);
             setCaptions(res.data.captions);
-            setSelectedCaption(null);
+            setSelectedCaptions([]);
             setTimer(30);
-            setMessage('');
         } catch (error) {
             console.error('Error fetching meme:', error);
         }
     };
 
     const handleCaptionClick = (caption) => {
-        setSelectedCaption(caption);
-        let roundScore = 0;
-        if (caption.correct) {
-            roundScore = 5;
-            setScore(score + 5);
-            setMessage('Correct! You earned 5 points.');
-        } else {
-            setMessage('Incorrect. Better luck next time.');
+        const newSelectedCaptions = [...selectedCaptions, caption];
+        setSelectedCaptions(newSelectedCaptions);
+
+        if (newSelectedCaptions.length === 2) {
+            const correct = newSelectedCaptions.some(c => c.correct);
+            const roundData = { memeId: meme.id, selectedCaptions: newSelectedCaptions.map(c => c.id), correct };
+            setRounds([...rounds, roundData]);
+            setTimeout(() => setRound(round + 1), 2000);
         }
-        setRounds([...rounds, { memeId: meme.id, selectedCaptionId: caption.id, score: roundScore }]);
-        setTimeout(() => setRound(round + 1), 2000);
     };
 
     const handleTimeout = () => {
-        setMessage('Time is up! No points awarded.');
-        setRounds([...rounds, { memeId: meme.id, selectedCaptionId: null, score: 0 }]);
+        const roundData = { memeId: meme.id, selectedCaptions: selectedCaptions.map(c => c.id), correct: false };
+        setRounds([...rounds, roundData]);
         setTimeout(() => setRound(round + 1), 2000);
     };
 
     const recordGame = async () => {
         try {
+            const totalScore = rounds.reduce((acc, round) => acc + (round.correct ? 5 : 0), 0);
             await axios.post('http://localhost:3001/api/record-game', {
-                userId,
-                rounds
+                userId: 1, // Assuming a logged-in user ID is set to 1, adjust as needed
+                rounds,
+                totalScore
             });
         } catch (error) {
             console.error('Error recording game:', error);
         }
     };
 
+    const totalScore = rounds.reduce((acc, round) => acc + (round.correct ? 5 : 0), 0);
+
     return (
         <div className="game-container">
             {gameOver ? (
                 <div className="game-over">
                     <h2>Game Over</h2>
-                    <p>Your total score: {score}</p>
+                    <p>Your total score: {totalScore}</p>
+                    {isGuest ? (
+                        <div>
+                            <p>Login to play more rounds</p>
+                            <button className="login-button" onClick={() => navigate('/login')}>Login</button>
+                        </div>
+                    ) : (
+                        <div>
+                            <p>Check the history of your games</p>
+                            <button className="history-button" onClick={() => navigate('/history')}>Game History</button>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="game-content">
@@ -97,12 +112,16 @@ function Game() {
                     )}
                     <div className="captions">
                         {captions.map((caption) => (
-                            <button key={caption.id} onClick={() => handleCaptionClick(caption)}>
+                            <button
+                                className={`caption-button ${selectedCaptions.includes(caption) ? 'selected' : ''}`}
+                                key={caption.id}
+                                onClick={() => handleCaptionClick(caption)}
+                                disabled={selectedCaptions.includes(caption)}
+                            >
                                 {caption.text}
                             </button>
                         ))}
                     </div>
-                    <p>{message}</p>
                 </div>
             )}
         </div>

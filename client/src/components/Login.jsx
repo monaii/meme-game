@@ -13,7 +13,7 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:3001/auth/login', { username, password }, { withCredentials: true });
-            if (response.data) {
+            if (response.data.success) {
                 navigate('/game');
             }
         } catch (error) {
@@ -21,13 +21,16 @@ const Login = () => {
         }
     };
 
+    const handleGuestPlay = () => {
+        navigate('/game?guest=true');
+    };
 
     return (
         <div className="center-container bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
                 <div className="space-y-2">
                     <h2 className="text-3xl font-extrabold text-center text-gray-900">Welcome</h2>
-                    <p className="text-center text-gray-600">Please login to your account</p>
+                    <p className="text-center text-gray-600">Please login to your account or play as a guest</p>
                 </div>
                 {error && <div className="p-3 text-sm text-red-600 bg-red-100 rounded">{error}</div>}
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -57,6 +60,9 @@ const Login = () => {
                         Login
                     </button>
                 </form>
+                <button onClick={handleGuestPlay} className="w-full py-3 mt-4 text-lg font-semibold text-white bg-gray-600 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                    Play as Guest
+                </button>
             </div>
         </div>
     );
