@@ -6,11 +6,13 @@ import '../styles/Game.css';
 function Game() {
     const [meme, setMeme] = useState(null);
     const [captions, setCaptions] = useState([]);
-    const [selectedCaptions, setSelectedCaptions] = useState([]);
+    const [selectedCaption, setSelectedCaption] = useState(null);
     const [round, setRound] = useState(1);
     const [timer, setTimer] = useState(30);
     const [gameOver, setGameOver] = useState(false);
     const [rounds, setRounds] = useState([]);
+    const [shownMemes, setShownMemes] = useState([]);
+    const [score, setScore] = useState(0); // Initialize score
     const navigate = useNavigate();
     const location = useLocation();
     const isGuest = new URLSearchParams(location.search).get('guest') === 'true';
@@ -37,41 +39,55 @@ function Game() {
 
     const fetchMeme = async () => {
         try {
-            const res = await axios.get('http://localhost:3001/api/random-meme');
+            const res = await axios.post('http://localhost:3001/api/random-meme', { excludeMemes: shownMemes });
+            const shuffledCaptions = shuffleArray(res.data.captions);
             setMeme(res.data.meme);
-            setCaptions(res.data.captions);
-            setSelectedCaptions([]);
+            setCaptions(shuffledCaptions);
+            setSelectedCaption(null);
+            setShownMemes([...shownMemes, res.data.meme.id]);
             setTimer(30);
         } catch (error) {
             console.error('Error fetching meme:', error);
         }
     };
 
-    const handleCaptionClick = (caption) => {
-        const newSelectedCaptions = [...selectedCaptions, caption];
-        setSelectedCaptions(newSelectedCaptions);
+    const shuffleArray = (array) => {
+        return array.sort(() => Math.random() - 0.5);
+    };
 
-        if (newSelectedCaptions.length === 2) {
-            const correct = newSelectedCaptions.some(c => c.correct);
-            const roundData = { memeId: meme.id, selectedCaptions: newSelectedCaptions.map(c => c.id), correct };
+    const handleCaptionClick = async (caption) => {
+        setSelectedCaption(caption);
+
+        try {
+            const res = await axios.post('http://localhost:3001/api/submit-round', {
+                user_id: isGuest ? null : 1, // Assuming user ID 1 for logged in user, adjust as needed
+                guest_id: isGuest ? 'guest' : null,
+                meme_id: meme.id,
+                selected_caption_id: caption.id
+            });
+            const roundScore = res.data.score;
+            setScore(score + roundScore);
+            const correct = roundScore > 0;
+            const roundData = { memeId: meme.id, selectedCaption: caption.id, correct };
             setRounds([...rounds, roundData]);
             setTimeout(() => setRound(round + 1), 2000);
+        } catch (error) {
+            console.error('Error submitting round:', error);
         }
     };
 
     const handleTimeout = () => {
-        const roundData = { memeId: meme.id, selectedCaptions: selectedCaptions.map(c => c.id), correct: false };
+        const roundData = { memeId: meme.id, selectedCaption: selectedCaption ? selectedCaption.id : null, correct: false };
         setRounds([...rounds, roundData]);
         setTimeout(() => setRound(round + 1), 2000);
     };
 
     const recordGame = async () => {
         try {
-            const totalScore = rounds.reduce((acc, round) => acc + (round.correct ? 5 : 0), 0);
             await axios.post('http://localhost:3001/api/record-game', {
                 userId: 1, // Assuming a logged-in user ID is set to 1, adjust as needed
                 rounds,
-                totalScore
+                totalScore: score
             });
         } catch (error) {
             console.error('Error recording game:', error);
@@ -79,6 +95,28 @@ function Game() {
     };
 
     const totalScore = rounds.reduce((acc, round) => acc + (round.correct ? 5 : 0), 0);
+
+    const startOver = () => {
+        setMeme(null);
+        setCaptions([]);
+        setSelectedCaption(null);
+        setRound(1);
+        setTimer(30);
+        setGameOver(false);
+        setRounds([]);
+        setShownMemes([]);
+        setScore(0);
+        fetchMeme();
+    };
+
+    const handleLogout = async () => {
+        try {
+            await axios.post('http://localhost:3001/auth/logout');
+            navigate('/login');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
 
     return (
         <div className="game-container">
@@ -95,6 +133,9 @@ function Game() {
                         <div>
                             <p>Check the history of your games</p>
                             <button className="history-button" onClick={() => navigate('/history')}>Game History</button>
+                            <p>Have fun? Do you want to play more?</p>
+                            <button className="start-over-button" onClick={startOver}>Start Over</button>
+                            <button className="logout-button" onClick={handleLogout}>Logout</button>
                         </div>
                     )}
                 </div>
@@ -113,10 +154,10 @@ function Game() {
                     <div className="captions">
                         {captions.map((caption) => (
                             <button
-                                className={`caption-button ${selectedCaptions.includes(caption) ? 'selected' : ''}`}
+                                className={`caption-button ${selectedCaption && selectedCaption.id === caption.id ? 'selected' : ''}`}
                                 key={caption.id}
                                 onClick={() => handleCaptionClick(caption)}
-                                disabled={selectedCaptions.includes(caption)}
+                                disabled={selectedCaption && selectedCaption.id === caption.id}
                             >
                                 {caption.text}
                             </button>

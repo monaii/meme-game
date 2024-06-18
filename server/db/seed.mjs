@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import bcrypt from 'bcrypt';
+import { hashPassword } from '../utilities.js';
 
 const seedDatabase = async () => {
     const db = await open({
@@ -60,10 +61,11 @@ const seedDatabase = async () => {
     for (const user of users) {
         const existingUser = await db.get('SELECT * FROM users WHERE username = ?', user.username);
         if (!existingUser) {
-            const hashedPassword = await bcrypt.hash(user.password, 10);
+            const hashedPassword = await hashPassword(user.password);
             await db.run('INSERT INTO users (username, password) VALUES (?, ?)', user.username, hashedPassword);
         }
     }
+
 
     const memeCount = await db.get('SELECT COUNT(*) as count FROM memes');
     if (memeCount.count === 0) {

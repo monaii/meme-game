@@ -1,12 +1,24 @@
-// server/routes/auth.mjs
 import express from 'express';
 import passport from 'passport';
+import { comparePassword } from '../utilities.js'; // Adjust the import path as needed
 
 const router = express.Router();
 
 // Login route
-router.post('/login', passport.authenticate('local'), (req, res) => {
-    res.json({ success: true, user: req.user });
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', async (err, user, info) => {
+        if (err) { return next(err); }
+        if (!user) { return res.status(400).json({ success: false, message: info.message }); }
+
+        req.logIn(user, async (err) => {
+            if (err) { return next(err); }
+            const isMatch = await comparePassword(req.body.password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ success: false, message: 'Incorrect password.' });
+            }
+            return res.json({ success: true, user });
+        });
+    })(req, res, next);
 });
 
 // Logout route
