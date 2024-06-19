@@ -94,8 +94,58 @@ router.post('/record-game', async (req, res) => {
         await db.run('INSERT INTO games (user_id, total_score) VALUES (?, ?)', [userId, totalScore]);
         const gameId = await db.get('SELECT last_insert_rowid() as id');
         for (const round of rounds) {
-            await db.run('INSERT INTO rounds (game_id, meme_id, selected_caption_id, score) VALUES (?, ?, ?, ?)', [gameId.id, round.memeId, round.selectedCaptions.join(','), round.correct ? 5 : 0]);
+            await db.run('INSERT INTO rounds (game_id, meme_id, selected_caption_id, score) VALUES (?, ?, ?, ?)', [gameId.id, round.memeId, round.selectedCaption, round.correct ? 5 : 0]);
         }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get game history for a user
+router.get('/game-history/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const games = await db.all(`
+            SELECT g.id as game_id, g.total_score, r.id as round_id, r.score as round_score, m.image_url, c.text as caption_text
+            FROM games g
+            LEFT JOIN rounds r ON g.id = r.game_id
+            LEFT JOIN memes m ON r.meme_id = m.id
+            LEFT JOIN captions c ON r.selected_caption_id = c.id
+            WHERE g.user_id = ?
+            ORDER BY g.id, r.id
+        `, [userId]);
+
+        const formattedGames = games.reduce((acc, game) => {
+            if (!acc[game.game_id]) {
+                acc[game.game_id] = {
+                    id: game.game_id,
+                    total_score: game.total_score,
+                    rounds: []
+                };
+            }
+            acc[game.game_id].rounds.push({
+                id: game.round_id,
+                meme: { image_url: game.image_url },
+                caption: { text: game.caption_text },
+                score: game.round_score
+            });
+            return acc;
+        }, {});
+
+        res.json({ games: Object.values(formattedGames) });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete game history for a user
+router.delete('/game-history/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        await db.run('DELETE FROM rounds WHERE game_id IN (SELECT id FROM games WHERE user_id = ?)', [userId]);
+        await db.run('DELETE FROM games WHERE user_id = ?', [userId]);
+        await db.run('UPDATE sqlite_sequence SET seq = 0 WHERE name = "games"');
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });

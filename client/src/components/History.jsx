@@ -1,48 +1,72 @@
 // client/src/components/History.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import '../styles/History.css';
+import { UserContext } from '../context/UserContext';
 
 const History = () => {
-    const [history, setHistory] = useState([]);
+    const [games, setGames] = useState([]);
+    const { user } = useContext(UserContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchHistory = async () => {
-            try {
-                const response = await axios.get('http://localhost:3001/api/user-history', { withCredentials: true });
-                setHistory(response.data.games);
-            } catch (error) {
-                console.error('Error fetching history:', error);
+        const fetchGameHistory = async () => {
+            if (user && user.id) {
+                try {
+                    const res = await axios.get(`http://localhost:3001/api/game-history/${user.id}`);
+                    setGames(res.data.games);
+                } catch (error) {
+                    console.error('Error fetching game history:', error);
+                }
             }
         };
 
-        fetchHistory();
-    }, []);
+        fetchGameHistory();
+    }, [user]);
+
+    const handleDeleteHistory = async () => {
+        try {
+            await axios.delete(`http://localhost:3001/api/game-history/${user.id}`);
+            setGames([]); // Clear history in state
+        } catch (error) {
+            console.error('Error deleting history:', error);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await axios.post('http://localhost:3001/auth/logout');
+            navigate('/login');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
 
     return (
-        <div className="history-container">
-            <h2>Your Game History</h2>
-            {history.length === 0 ? (
-                <p>No game history found.</p>
+        <div>
+            <h2>Game History</h2>
+            {games.length === 0 ? (
+                <p>No games played yet.</p>
             ) : (
-                <div className="history-list">
-                    {history.map((game, index) => (
-                        <div key={index} className="game-history-item">
-                            <h3>Game {index + 1}</h3>
-                            <p>Total Score: {game.total_score}</p>
-                            <div className="round-history">
-                                {game.rounds.map((round, roundIndex) => (
-                                    <div key={roundIndex} className="round-history-item">
-                                        <p>Round {roundIndex + 1}</p>
-                                        <img src={round.meme_image_url} alt={`Meme ${round.meme_id}`} />
-                                        <p>Selected Caption: {round.selected_caption_text}</p>
-                                        <p>Score: {round.score}</p>
-                                    </div>
-                                ))}
+                games.map((game) => (
+                    <div key={game.id} className="game-summary">
+                        <h3>Game {game.id}</h3>
+                        <p>Total Score: {game.total_score}</p>
+                        {game.rounds.map((round, index) => (
+                            <div key={round.id} className="round-summary">
+                                <h4>Round {index + 1}</h4>
+                                <img src={round.meme.image_url} alt="Meme" />
+                                <p>Selected Caption: {round.caption.text}</p>
+                                <p>Score: {round.score}</p>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ))
             )}
+            <button onClick={handleDeleteHistory}>Delete History</button>
+            <button onClick={() => navigate('/options')}>Back to Options</button>
+            <button onClick={handleLogout}>Logout</button>
         </div>
     );
 };

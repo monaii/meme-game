@@ -7,12 +7,15 @@ function Game() {
     const [meme, setMeme] = useState(null);
     const [captions, setCaptions] = useState([]);
     const [selectedCaption, setSelectedCaption] = useState(null);
+    const [correctCaptions, setCorrectCaptions] = useState([]);
     const [round, setRound] = useState(1);
     const [timer, setTimer] = useState(30);
     const [gameOver, setGameOver] = useState(false);
     const [rounds, setRounds] = useState([]);
     const [shownMemes, setShownMemes] = useState([]);
-    const [score, setScore] = useState(0); // Initialize score
+    const [score, setScore] = useState(0);
+    const [resultMessage, setResultMessage] = useState('');
+    const [showResult, setShowResult] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const isGuest = new URLSearchParams(location.search).get('guest') === 'true';
@@ -29,13 +32,13 @@ function Game() {
     }, [round]);
 
     useEffect(() => {
-        if (timer > 0) {
+        if (timer > 0 && !showResult) {
             const timeout = setTimeout(() => setTimer(timer - 1), 1000);
             return () => clearTimeout(timeout);
-        } else {
+        } else if (timer === 0) {
             handleTimeout();
         }
-    }, [timer]);
+    }, [timer, showResult]);
 
     const fetchMeme = async () => {
         try {
@@ -43,9 +46,11 @@ function Game() {
             const shuffledCaptions = shuffleArray(res.data.captions);
             setMeme(res.data.meme);
             setCaptions(shuffledCaptions);
+            setCorrectCaptions(shuffledCaptions.filter(c => c.correct));
             setSelectedCaption(null);
             setShownMemes([...shownMemes, res.data.meme.id]);
             setTimer(30);
+            setShowResult(false);
         } catch (error) {
             console.error('Error fetching meme:', error);
         }
@@ -60,7 +65,7 @@ function Game() {
 
         try {
             const res = await axios.post('http://localhost:3001/api/submit-round', {
-                user_id: isGuest ? null : 1, // Assuming user ID 1 for logged in user, adjust as needed
+                user_id: isGuest ? null : 1,
                 guest_id: isGuest ? 'guest' : null,
                 meme_id: meme.id,
                 selected_caption_id: caption.id
@@ -70,6 +75,13 @@ function Game() {
             const correct = roundScore > 0;
             const roundData = { memeId: meme.id, selectedCaption: caption.id, correct };
             setRounds([...rounds, roundData]);
+
+            if (correct) {
+                setResultMessage('Correct answer, great you got 5 score...');
+            } else {
+                setResultMessage('Incorrect answer, better luck next time');
+            }
+            setShowResult(true);
             setTimeout(() => setRound(round + 1), 2000);
         } catch (error) {
             console.error('Error submitting round:', error);
@@ -77,15 +89,17 @@ function Game() {
     };
 
     const handleTimeout = () => {
-        const roundData = { memeId: meme.id, selectedCaption: selectedCaption ? selectedCaption.id : null, correct: false };
+        setResultMessage('Time is up, better luck next time');
+        const roundData = { memeId: meme.id, selectedCaption: null, correct: false };
         setRounds([...rounds, roundData]);
+        setShowResult(true);
         setTimeout(() => setRound(round + 1), 2000);
     };
 
     const recordGame = async () => {
         try {
             await axios.post('http://localhost:3001/api/record-game', {
-                userId: 1, // Assuming a logged-in user ID is set to 1, adjust as needed
+                userId: 1,
                 rounds,
                 totalScore: score
             });
@@ -152,17 +166,33 @@ function Game() {
                         </div>
                     )}
                     <div className="captions">
-                        {captions.map((caption) => (
-                            <button
-                                className={`caption-button ${selectedCaption && selectedCaption.id === caption.id ? 'selected' : ''}`}
-                                key={caption.id}
-                                onClick={() => handleCaptionClick(caption)}
-                                disabled={selectedCaption && selectedCaption.id === caption.id}
-                            >
-                                {caption.text}
-                            </button>
-                        ))}
+                        {captions.map((caption) => {
+                            const isSelected = selectedCaption && selectedCaption.id === caption.id;
+                            const isCorrect = correctCaptions.includes(caption);
+                            const isIncorrect = showResult && !isCorrect && isSelected;
+
+                            console.log('Caption:', caption.text, 'isSelected:', isSelected, 'isCorrect:', isCorrect, 'isIncorrect:', isIncorrect);
+
+                            return (
+                                <button
+                                    className={`caption-button 
+                                    ${isSelected ? (isCorrect ? 'selected-correct' : 'selected-incorrect') : ''}
+                                    ${showResult && isCorrect ? 'correct' : ''}
+                                    ${isIncorrect ? 'incorrect' : ''}`}
+                                    key={caption.id}
+                                    onClick={() => handleCaptionClick(caption)}
+                                    disabled={selectedCaption !== null}
+                                >
+                                    {caption.text}
+                                </button>
+                            );
+                        })}
                     </div>
+                    {selectedCaption && (
+                        <div className="round-result">
+                            {resultMessage}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

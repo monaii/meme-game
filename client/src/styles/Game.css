@@ -30,7 +30,7 @@
     gap: 10px;
 }
 
-.captions button {
+.caption-button {
     flex: 1 1 calc(50% - 10px);
     background-color: #4a90e2;
     color: white;
@@ -42,12 +42,28 @@
     transition: background-color 0.3s;
 }
 
-.captions button:hover {
-    background-color: #357abd;
+.caption-button:hover {
+    background-color: lightslategrey;
 }
 
-.captions button.selected {
-    background-color: #8a2be2;
+.game-container .game-content .captions .caption-button.selected-correct {
+    background-color: green !important;
+    color: white !important;
+}
+
+.game-container .game-content .captions .caption-button.selected-incorrect {
+    background-color: pink !important;
+    color: white !important;
+}
+
+.game-container .game-content .captions .caption-button.correct {
+    background-color: green !important;
+    color: white !important;
+}
+
+.game-container .game-content .captions .caption-button.incorrect {
+    background-color: pink !important;
+    color: white !important;
 }
 
 .timer-bar {
@@ -68,7 +84,7 @@
     text-align: center;
 }
 
-.login-button, .history-button {
+.login-button, .history-button, .start-over-button, .logout-button {
     background-color: #4a90e2;
     color: white;
     border: none;
@@ -79,6 +95,12 @@
     margin-top: 10px;
 }
 
-.login-button:hover, .history-button:hover {
+.login-button:hover, .history-button:hover, .start-over-button:hover, .logout-button:hover {
     background-color: #357abd;
+}
+
+.round-result {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 18px;
 }

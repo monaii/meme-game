@@ -1,20 +1,23 @@
 // client/src/components/Login.jsx
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../context/UserContext';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { setUser } = useContext(UserContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:3001/auth/login', { username, password }, { withCredentials: true });
             if (response.data.success) {
-                navigate('/game');
+                setUser(response.data.user); // Set the user context
+                navigate('/options'); // Redirect to options page
             }
         } catch (error) {
             setError('Login failed. Please check your username and password.');

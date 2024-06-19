@@ -1,0 +1,280 @@
+.game-summary {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.round-summary {
+    margin-left: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.round-summary img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.round-summary p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #555;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.bg-gradient-to-r {
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+}
+
+.w-full {
+    width: 100%;
+}
+
+.max-w-md {
+    max-width: 28rem;
+}
+
+.p-8 {
+    padding: 2rem;
+}
+
+.space-y-6 > * + * {
+    margin-top: 1.5rem;
+}
+
+.bg-white {
+    background-color: #fff;
+}
+
+.rounded-xl {
+    border-radius: 0.75rem;
+}
+
+.shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+.text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+}
+
+.font-extrabold {
+    font-weight: 800;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-gray-900 {
+    color: #1a202c;
+}
+
+.text-gray-600 {
+    color: #718096;
+}
+
+.p-3 {
+    padding: 0.75rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.text-red-600 {
+    color: #e53e3e;
+}
+
+.bg-red-100 {
+    background-color: #fff5f5;
+}
+
+.rounded {
+    border-radius: 0.25rem;
+}
+
+.space-y-1 > * + * {
+    margin-top: 0.25rem;
+}
+
+.block {
+    display: block;
+}
+
+.text-gray-700 {
+    color: #4a5568;
+}
+
+.px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.border {
+    border-width: 1px;
+}
+
+.border-gray-300 {
+    border-color: #d2d6dc;
+}
+
+.rounded-md {
+    border-radius: 0.375rem;
+}
+
+.focus\:ring {
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.6);
+}
+
+.focus\:outline-none {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.py-3 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.bg-indigo-600 {
+    background-color: #4c51bf;
+}
+
+.hover\:bg-indigo-700:hover {
+    background-color: #434190;
+}
+
+.focus\:ring-2 {
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.6);
+}
+
+.focus\:ring-indigo-400 {
+    box-shadow: 0 0 0 2px rgba(180, 197, 235, 0.6);
+}
+
+.text-white {
+    color: #fff;
+}
+
+.bg-gray-600 {
+    background-color: #718096;
+}
+
+.hover\:bg-gray-700:hover {
+    background-color: #4a5568;
+}
+
+.focus\:ring-gray-400 {
+    box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.6);
+}
+/* client/src/styles/History.css */
+.game-summary {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.round-summary {
+    margin-left: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.delete-history-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-history-button:hover {
+    background-color: #c0392b;
+}
+/* client/src/styles/History.css */
+.game-summary {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.round-summary {
+    margin-left: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
