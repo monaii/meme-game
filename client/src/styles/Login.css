@@ -4,53 +4,59 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(to right, #0000ff, #ff00ff, #ff007f);
+    background: linear-gradient(to right, #D8BFD8, #E6E6FA, #F8BBD0); /* Light pastel colors */
 }
 
 .login-form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background: rgba(255, 255, 255, 0.9); /* Slightly transparent white background */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 300px;
+    width: 350px;
 }
 
 .login-form h2 {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    font-size: 1.5em;
+    color: #333; /* Dark gray text */
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: #666; /* Medium gray text */
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 1em;
 }
 
 .button {
     width: 100%;
-    padding: 10px;
-    background: #007bff;
+    padding: 12px;
+    background: #9370DB; /* Soft purple */
     color: #fff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s;
 }
 
 .button:hover {
-    background: #0056b3;
+    background: #836FFF; /* Slightly darker soft purple */
 }
 
 .error {
-    color: red;
-    margin-bottom: 10px;
+    color: #FF6347; /* Soft red for errors */
+    margin-bottom: 15px;
 }

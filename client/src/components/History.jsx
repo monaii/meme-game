@@ -1,4 +1,3 @@
-// client/src/components/History.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +6,7 @@ import { UserContext } from '../context/UserContext';
 
 const History = () => {
     const [games, setGames] = useState([]);
+    const [totalScores, setTotalScores] = useState(0);
     const { user } = useContext(UserContext);
     const navigate = useNavigate();
 
@@ -22,7 +22,20 @@ const History = () => {
             }
         };
 
+        const fetchTotalScores = async () => {
+            if (user && user.id) {
+                try {
+                    const res = await axios.get(`http://localhost:3001/api/total-scores/${user.id}`);
+                    const totalScoreSum = res.data.totalScores.reduce((sum, game) => sum + game.total_score, 0);
+                    setTotalScores(totalScoreSum);
+                } catch (error) {
+                    console.error('Error fetching total scores:', error);
+                }
+            }
+        };
+
         fetchGameHistory();
+        fetchTotalScores();
     }, [user]);
 
     const handleDeleteHistory = async () => {
@@ -44,8 +57,14 @@ const History = () => {
     };
 
     return (
-        <div>
+        <div className="history-container">
             <h2>Game History</h2>
+            <h3>Total Score of All Games: {totalScores}</h3>
+            <div className="button-container">
+                <button onClick={handleDeleteHistory}>Delete History</button>
+                <button onClick={() => navigate('/options')}>Back to Options</button>
+                <button onClick={handleLogout}>Logout</button>
+            </div>
             {games.length === 0 ? (
                 <p>No games played yet.</p>
             ) : (
@@ -64,9 +83,6 @@ const History = () => {
                     </div>
                 ))
             )}
-            <button onClick={handleDeleteHistory}>Delete History</button>
-            <button onClick={() => navigate('/options')}>Back to Options</button>
-            <button onClick={handleLogout}>Logout</button>
         </div>
     );
 };

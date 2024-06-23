@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background: #f0f4f8;
+    background: linear-gradient(to right, #e0e0e0, #f8e8f8); /* Soft pastel gradient */
     padding: 20px;
 }
 
@@ -19,7 +19,7 @@
     font-size: 16px;
     font-weight: bold;
     color: #fff;
-    background-color: #007bff;
+    background-color: #9370DB; /* Soft purple */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -27,5 +27,5 @@
 }
 
 .option-button:hover {
-    background-color: #0056b3;
+    background-color: #836FFF; /* Slightly darker soft purple */
 }

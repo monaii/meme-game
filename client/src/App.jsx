@@ -13,7 +13,7 @@ const App = () => {
         <UserProvider>
             <Router>
                 <Routes>
-                    <Route exact path="/" element={<Home />} />
+                    <Route exact path="/" element={<Home/>} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/game" element={<Game />} />
                     <Route path="/history" element={<History />} />

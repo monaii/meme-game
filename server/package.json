@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "0.1.0",
-  "main": "routes/index.mjs",
+  "main": "index.mjs",
   "type": "module",
   "scripts": {
     "seed": "node db/seed.mjs",

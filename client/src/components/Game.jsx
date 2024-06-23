@@ -16,29 +16,31 @@ function Game() {
     const [score, setScore] = useState(0);
     const [resultMessage, setResultMessage] = useState('');
     const [showResult, setShowResult] = useState(false);
+    const [waitingForNextRound, setWaitingForNextRound] = useState(false);
+    const [roundHandled, setRoundHandled] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const isGuest = new URLSearchParams(location.search).get('guest') === 'true';
 
     useEffect(() => {
-        if (round <= (isGuest ? 1 : 3)) {
+        if (round <= (isGuest ? 1 : 3) && !waitingForNextRound) {
             fetchMeme();
-        } else {
+        } else if (round > (isGuest ? 1 : 3)) {
             setGameOver(true);
             if (!isGuest) {
                 recordGame();
             }
         }
-    }, [round]);
+    }, [round, waitingForNextRound]);
 
     useEffect(() => {
         if (timer > 0 && !showResult) {
             const timeout = setTimeout(() => setTimer(timer - 1), 1000);
             return () => clearTimeout(timeout);
-        } else if (timer === 0) {
+        } else if (timer === 0 && !roundHandled) {
             handleTimeout();
         }
-    }, [timer, showResult]);
+    }, [timer, showResult, roundHandled]);
 
     const fetchMeme = async () => {
         try {
@@ -51,6 +53,8 @@ function Game() {
             setShownMemes([...shownMemes, res.data.meme.id]);
             setTimer(30);
             setShowResult(false);
+            setWaitingForNextRound(false);
+            setRoundHandled(false);
         } catch (error) {
             console.error('Error fetching meme:', error);
         }
@@ -61,6 +65,8 @@ function Game() {
     };
 
     const handleCaptionClick = async (caption) => {
+        if (roundHandled) return;
+        setRoundHandled(true);
         setSelectedCaption(caption);
 
         try {
@@ -77,23 +83,43 @@ function Game() {
             setRounds([...rounds, roundData]);
 
             if (correct) {
-                setResultMessage('Correct answer, great you got 5 score...');
+                setResultMessage('Correct answer, now you got 5 scores!');
+                setCorrectCaptions(res.data.correctCaptions);
+                setTimeout(() => {
+                    nextRound();
+                }, 2000); // 2 seconds delay
             } else {
-                setResultMessage('Incorrect answer, better luck next time');
+                setResultMessage('Incorrect answer, better luck next time.');
+                setCorrectCaptions(res.data.correctCaptions);
+                setShowResult(true);
             }
-            setShowResult(true);
-            setTimeout(() => setRound(round + 1), 2000);
+            setWaitingForNextRound(true);
         } catch (error) {
             console.error('Error submitting round:', error);
         }
     };
 
-    const handleTimeout = () => {
-        setResultMessage('Time is up, better luck next time');
-        const roundData = { memeId: meme.id, selectedCaption: null, correct: false };
-        setRounds([...rounds, roundData]);
-        setShowResult(true);
-        setTimeout(() => setRound(round + 1), 2000);
+    const handleTimeout = async () => {
+        if (roundHandled) return;
+        setRoundHandled(true);
+
+        try {
+            const res = await axios.post('http://localhost:3001/api/submit-round', {
+                user_id: isGuest ? null : 1,
+                guest_id: isGuest ? 'guest' : null,
+                meme_id: meme.id,
+                selected_caption_id: null
+            });
+
+            setResultMessage(`Time up, check the correct captions for the next time!`);
+            const roundData = { memeId: meme.id, selectedCaption: null, correct: false };
+            setRounds([...rounds, roundData]);
+            setShowResult(true);
+            setCorrectCaptions(res.data.correctCaptions)
+            setWaitingForNextRound(true);
+        } catch (error) {
+            console.error('Error handling timeout:', error);
+        }
     };
 
     const recordGame = async () => {
@@ -132,6 +158,14 @@ function Game() {
         }
     };
 
+    const nextRound = () => {
+        setRound(round + 1);
+        setTimer(30);
+        setShowResult(false);
+        setWaitingForNextRound(false);
+        setRoundHandled(false);
+    };
+
     return (
         <div className="game-container">
             {gameOver ? (
@@ -168,29 +202,40 @@ function Game() {
                     <div className="captions">
                         {captions.map((caption) => {
                             const isSelected = selectedCaption && selectedCaption.id === caption.id;
-                            const isCorrect = correctCaptions.includes(caption);
+                            const isCorrect = correctCaptions.includes(caption.text);
                             const isIncorrect = showResult && !isCorrect && isSelected;
 
-                            console.log('Caption:', caption.text, 'isSelected:', isSelected, 'isCorrect:', isCorrect, 'isIncorrect:', isIncorrect);
-
+                            let buttonClass = 'caption-button';
+                            if (isSelected) {
+                                if (isCorrect) {
+                                    buttonClass += ' selected-correct';
+                                } else if (isIncorrect) {
+                                    buttonClass += ' selected-incorrect';
+                                }
+                            }
+                            if (showResult && !isSelected) {
+                                if (isCorrect) {
+                                    buttonClass += ' correct';
+                                }
+                            }
                             return (
                                 <button
-                                    className={`caption-button 
-                                    ${isSelected ? (isCorrect ? 'selected-correct' : 'selected-incorrect') : ''}
-                                    ${showResult && isCorrect ? 'correct' : ''}
-                                    ${isIncorrect ? 'incorrect' : ''}`}
+                                    className={buttonClass}
                                     key={caption.id}
                                     onClick={() => handleCaptionClick(caption)}
-                                    disabled={selectedCaption !== null}
+                                    disabled={selectedCaption !== null || timer === 0}
                                 >
                                     {caption.text}
                                 </button>
                             );
                         })}
                     </div>
-                    {selectedCaption && (
+                    {(showResult || timer === 0) && (
                         <div className="round-result">
                             {resultMessage}
+                            {waitingForNextRound && (
+                                <button className="next-round-button" onClick={nextRound}>Next Round</button>
+                            )}
                         </div>
                     )}
                 </div>
