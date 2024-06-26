@@ -60,8 +60,15 @@ export const recordGame = async (req, res) => {
 
         await db.run('INSERT INTO games (user_id, total_score) VALUES (?, ?)', [userId, totalScore]);
         const gameId = await db.get('SELECT last_insert_rowid() as id');
+
+        // Use a set to track unique round memeIds to prevent duplicate entries
+        const uniqueMemeIds = new Set();
+
         for (const round of rounds) {
-            await db.run('INSERT INTO rounds (game_id, meme_id, selected_caption_id, score) VALUES (?, ?, ?, ?)', [gameId.id, round.memeId, round.selectedCaption, calculateScore(round.correct)]);
+            if (!uniqueMemeIds.has(round.memeId)) {
+                uniqueMemeIds.add(round.memeId);
+                await db.run('INSERT INTO rounds (game_id, meme_id, selected_caption_id, score) VALUES (?, ?, ?, ?)', [gameId.id, round.memeId, round.selectedCaption, calculateScore(round.correct)]);
+            }
         }
         res.json({ success: true });
     } catch (error) {
@@ -69,6 +76,7 @@ export const recordGame = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 export const getGameHistory = async (req, res) => {
     const { userId } = req.params;

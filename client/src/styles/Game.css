@@ -5,7 +5,7 @@
     align-items: center;
     min-height: 100vh;
     background: linear-gradient(to bottom right, #7f00ff, #e100ff, #00c9ff);
-    padding: 20px; /* Add padding to prevent content from touching the edges */
+    padding: 20px;
 }
 
 .game-content {
@@ -89,6 +89,23 @@
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
+.game-over ul {
+    list-style: none;
+    padding: 0;
+}
+
+.game-over li {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.game-over img {
+    display: block;
+    margin: 0 auto 10px;
+    max-width: 100%;
+    border-radius: 10px;
+}
+
 .login-button, .history-button, .start-over-button, .logout-button {
     background-color: #7f00ff;
     color: white;
@@ -110,6 +127,7 @@
     font-weight: bold;
     font-size: 18px;
 }
+
 .next-round-button {
     margin-top: 20px;
     background-color: #9370DB;

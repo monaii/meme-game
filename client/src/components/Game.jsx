@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { UserContext } from '../context/UserContext';
 import '../styles/Game.css';
 
 function Game() {
@@ -20,6 +21,7 @@ function Game() {
     const [roundHandled, setRoundHandled] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useContext(UserContext);
     const isGuest = new URLSearchParams(location.search).get('guest') === 'true';
 
     useEffect(() => {
@@ -71,7 +73,7 @@ function Game() {
 
         try {
             const res = await axios.post('http://localhost:3001/api/submit-round', {
-                user_id: isGuest ? null : 1,
+                user_id: isGuest ? null : user.id,
                 guest_id: isGuest ? 'guest' : null,
                 meme_id: meme.id,
                 selected_caption_id: caption.id
@@ -79,7 +81,7 @@ function Game() {
             const roundScore = res.data.score;
             setScore(score + roundScore);
             const correct = roundScore > 0;
-            const roundData = { memeId: meme.id, selectedCaption: caption.id, correct };
+            const roundData = { memeId: meme.id, memeImage: meme.image_url, selectedCaption: caption.text, correct };
             setRounds([...rounds, roundData]);
 
             if (correct) {
@@ -105,17 +107,17 @@ function Game() {
 
         try {
             const res = await axios.post('http://localhost:3001/api/submit-round', {
-                user_id: isGuest ? null : 1,
+                user_id: isGuest ? null : user.id,
                 guest_id: isGuest ? 'guest' : null,
                 meme_id: meme.id,
                 selected_caption_id: null
             });
 
             setResultMessage(`Time up, check the correct captions for the next time!`);
-            const roundData = { memeId: meme.id, selectedCaption: null, correct: false };
+            const roundData = { memeId: meme.id, memeImage: meme.image_url, selectedCaption: null, correct: false };
             setRounds([...rounds, roundData]);
             setShowResult(true);
-            setCorrectCaptions(res.data.correctCaptions)
+            setCorrectCaptions(res.data.correctCaptions);
             setWaitingForNextRound(true);
         } catch (error) {
             console.error('Error handling timeout:', error);
@@ -124,17 +126,22 @@ function Game() {
 
     const recordGame = async () => {
         try {
+            const uniqueRounds = rounds.reduce((acc, round) => {
+                if (!acc.find(r => r.memeId === round.memeId)) {
+                    acc.push(round);
+                }
+                return acc;
+            }, []);
+
             await axios.post('http://localhost:3001/api/record-game', {
-                userId: 1,
-                rounds,
+                userId: user.id,
+                rounds: uniqueRounds,
                 totalScore: score
             });
         } catch (error) {
             console.error('Error recording game:', error);
         }
     };
-
-    const totalScore = rounds.reduce((acc, round) => acc + (round.correct ? 5 : 0), 0);
 
     const startOver = () => {
         setMeme(null);
@@ -166,12 +173,23 @@ function Game() {
         setRoundHandled(false);
     };
 
+    const correctAnswers = rounds.filter(round => round.correct);
+
     return (
         <div className="game-container">
             {gameOver ? (
                 <div className="game-over">
                     <h2>Game Over</h2>
-                    <p>Your total score: {totalScore}</p>
+                    <p>Your total score: {score}</p>
+                    <h3>{correctAnswers.length > 0 ? 'Recap correct answers' : 'No correct answer to recap'}</h3>
+                    <ul>
+                        {correctAnswers.map((round, index) => (
+                            <li key={index}>
+                                <img src={round.memeImage} alt={`Meme ${index + 1}`} />
+                                Meme {index + 1}: Your Caption: {round.selectedCaption}
+                            </li>
+                        ))}
+                    </ul>
                     {isGuest ? (
                         <div>
                             <p>Login to play more rounds</p>
