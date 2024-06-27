@@ -26,8 +26,7 @@ const History = () => {
             if (user && user.id) {
                 try {
                     const res = await axios.get(`http://localhost:3001/api/total-scores/${user.id}`);
-                    const totalScoreSum = res.data.totalScores.reduce((sum, game) => sum + game.total_score, 0);
-                    setTotalScores(totalScoreSum);
+                    setTotalScores(res.data.totalScores);
                 } catch (error) {
                     console.error('Error fetching total scores:', error);
                 }
@@ -42,6 +41,7 @@ const History = () => {
         try {
             await axios.delete(`http://localhost:3001/api/game-history/${user.id}`);
             setGames([]); // Clear history in state
+            setTotalScores(0); // Reset total scores to 0
         } catch (error) {
             console.error('Error deleting history:', error);
         }

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { UserContext } from '../context/UserContext';
 import '../styles/Game.css';
+import { UserContext } from '../context/UserContext';
 
 function Game() {
     const [meme, setMeme] = useState(null);
@@ -81,7 +81,7 @@ function Game() {
             const roundScore = res.data.score;
             setScore(score + roundScore);
             const correct = roundScore > 0;
-            const roundData = { memeId: meme.id, memeImage: meme.image_url, selectedCaption: caption.text, correct };
+            const roundData = { memeId: meme.id, memeImage: meme.image_url, selectedCaptionId: caption.id, selectedCaption: caption.text, score: roundScore, correct };
             setRounds([...rounds, roundData]);
 
             if (correct) {
@@ -114,7 +114,7 @@ function Game() {
             });
 
             setResultMessage(`Time up, check the correct captions for the next time!`);
-            const roundData = { memeId: meme.id, memeImage: meme.image_url, selectedCaption: null, correct: false };
+            const roundData = { memeId: meme.id, memeImage: meme.image_url, selectedCaptionId: null, selectedCaption: null, score: 0, correct: false };
             setRounds([...rounds, roundData]);
             setShowResult(true);
             setCorrectCaptions(res.data.correctCaptions);
